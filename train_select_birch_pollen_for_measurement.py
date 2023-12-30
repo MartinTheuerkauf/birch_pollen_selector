@@ -156,7 +156,7 @@ for epoch in range(num_epochs): #(loop for every epoch)
 # Now, we need to save our trained model for testing and further usage. 
 # You can use the below code for saving the model in the file.
 
-save_path = 'test_model.pth'
+save_path = 'custom-classifier_resnet_18_final_60_last_tr_epochs v1.0.pth'
 torch.save(model.state_dict(), save_path)
 
 
@@ -167,7 +167,7 @@ torch.save(model.state_dict(), save_path)
 
 #------------------- Testing Steps---------------------------------------------------------------------------------------------
 
-# Step-12: For testing, we first need to load over the trained model. 
+# For testing, we first need to load over the trained model. 
 # you can use the below code for the loading model.
 
 model = models.resnet18(pretrained=True)   #load resnet18 model
@@ -220,74 +220,6 @@ with torch.no_grad():
     epoch_acc = running_corrects / len(test_dataset) * 100.
     print('[Test #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.
           format(epoch, epoch_loss, epoch_acc, time.time() - start_time))
-
-
-
-
-
-
-"""
-Apply the model (nach chatGPT)
-
-"""
-
-import torch
-import torchvision.transforms as transforms
-from torchvision import datasets, models, transforms
-import torch.nn as nn
-# import numpy as np
-from PIL import Image
-import os
-import glob
-
-os.chdir(r'D:\Arbeit\Lüneburg\Paper 1 Betula\training_recognition\data_Betula100')
-
-# Load the model
-# first, resnet needs to be loaded, and some parameters have to be set..
-model = models.resnet18(pretrained=True)   #load resnet18 model
-num_features = model.fc.in_features #extract fc layers features
-model.fc = nn.Linear(num_features, 2) #(num_of_class == 2)
-model.load_state_dict(torch.load('custom-classifier_resnet_18_final_60_last_tr_epochs.pth', map_location='cpu'))
-
-
-# Define the transformation to apply to the data
-transform = transforms.Compose([
-    transforms.Resize(224),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-
-
-srcf = r'D:\Arbeit\Lüneburg\Paper 1 Betula\KM23B 500-600\KM23B 500-600 94-95'
-imagelist = glob.glob(os.path.join(srcf, '*.tif'))
-
-for file_name in imagelist:
-
-    # Load the image
-    image = Image.open(file_name)
-    
-    # Apply the transformation to the image
-    image = transform(image).unsqueeze(0)
-    
-    # Make a prediction
-    with torch.no_grad():
-        outputs = model(image)
-        _, predicted = torch.max(outputs.data, 1)
-        probabilities = torch.nn.functional.softmax(outputs.data, dim=1)
-        
-    # Print the predicted class and the associated probability
-    # print('Predicted class:', predicted.item())
-    # print('Probability:', np.round(probabilities[:, predicted.item()].item(), 4))
-    
-    print(predicted.item(), np.round(probabilities[:, predicted.item()].item(), 4))
-
-        
-
-
-
-
-
-
 
 
 
